@@ -14,6 +14,11 @@ from django.contrib.auth import authenticate
 from .models import User, OTP
 from .serializers import RegisterSerializer, VerifyOTPSerializer, LoginSerializer
 
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+
 
 OTP_TTL_MINUTES = 10
 
@@ -142,3 +147,15 @@ class ResendOTPView(generics.GenericAPIView):
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         if user.is_verified:
             return Response({'message': 'User already verified.'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+# Logout API
+class LogoutView(APIView):
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()  # blacklist the refresh token
+            return Response({"message": "Logged out successfully"}, status=200)
+        except Exception as e:
+            return Response({"error": "Invalid token"}, status=400)
