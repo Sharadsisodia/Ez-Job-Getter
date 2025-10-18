@@ -135,18 +135,33 @@ class LoginView(generics.GenericAPIView):
             }
         }, status=status.HTTP_200_OK)
 
+from rest_framework import serializers, generics, permissions, status
+from rest_framework.response import Response
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
+# Serializer for Resend OTP
+class ResendOTPSerializer(serializers.Serializer):
+    email = serializers.EmailField()
 
 class ResendOTPView(generics.GenericAPIView):
     permission_classes = [permissions.AllowAny]
-
+    serializer_class = ResendOTPSerializer
 
     def post(self, request, *args, **kwargs):
-        email = request.data.get('email')
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        email = serializer.validated_data['email']
+
         user = User.objects.filter(email=email).first()
         if not user:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
         if user.is_verified:
             return Response({'message': 'User already verified.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Your logic to resend OTP here
+        # Example: user.send_otp()
+        return Response({'message': 'OTP sent successfully.'}, status=status.HTTP_200_OK)
 
 
 # Logout API
@@ -159,3 +174,35 @@ class LogoutView(APIView):
             return Response({"message": "Logged out successfully"}, status=200)
         except Exception as e:
             return Response({"error": "Invalid token"}, status=400)
+
+
+from rest_framework import viewsets, mixins
+from rest_framework.decorators import action
+
+class AccountViewSet(viewsets.ViewSet):
+    permission_classes = [permissions.AllowAny]
+
+    @action(detail=False, methods=['post'])
+    def signup(self, request):
+        view = SignupView.as_view()
+        return view(request._request)
+
+    @action(detail=False, methods=['post'])
+    def verify_otp(self, request):
+        view = VerifyOTPView.as_view()
+        return view(request._request)
+
+    @action(detail=False, methods=['post'])
+    def login(self, request):
+        view = LoginView.as_view()
+        return view(request._request)
+
+    @action(detail=False, methods=['post'])
+    def logout(self, request):
+        view = LogoutView.as_view()
+        return view(request._request)
+
+    @action(detail=False, methods=['post'])
+    def resend_otp(self, request):
+        view = ResendOTPView.as_view()
+        return view(request._request)
