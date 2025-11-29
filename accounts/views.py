@@ -10,9 +10,9 @@ from rest_framework import generics, status, permissions
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
-
+from rest_framework.permissions import IsAuthenticated
 from .models import User, OTP
-from .serializers import RegisterSerializer, VerifyOTPSerializer, LoginSerializer
+from .serializers import RegisterSerializer, VerifyOTPSerializer, LoginSerializer, UserSerializer
 
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
@@ -206,3 +206,8 @@ class AccountViewSet(viewsets.ViewSet):
     def resend_otp(self, request):
         view = ResendOTPView.as_view()
         return view(request._request)
+    
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def me(self, request):
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
