@@ -1,54 +1,64 @@
-import { createContext, useState, useEffect } from "react";
-import api from "../api/axiosInstance";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { loginAPI, getMeAPI, setAuthToken } from "../utils/api";
+import { saveTokens } from "../utils/auth";
 
-export const AuthContext = createContext();
+export const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+export function AuthProvider({ children }) {
+  const [user, setUser] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("user") || "null");
+    } catch {
+      return null;
+    }
+  });
+
   const [loading, setLoading] = useState(true);
 
-  // Check token on first load
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (token) {
+      setAuthToken(token); // attach token to axios
       fetchUser();
     } else {
       setLoading(false);
     }
   }, []);
 
-  // Fetch logged-in user
   const fetchUser = async () => {
     try {
-      const res = await api.get("/api/accounts/me/");
+      const res = await getMeAPI();
       setUser(res.data);
+      localStorage.setItem("user", JSON.stringify(res.data));
     } catch (err) {
-      localStorage.removeItem("accessToken");
+      // Token invalid → clear session
+      localStorage.clear();
+      setUser(null);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
-  // Signup
-  const signup = async (data) => {
-    return await api.post("/api/accounts/signup/", data);
-  };
+  const login = async ({ email, password }) => {
+    const res = await loginAPI({ email, password });
 
-  // Verify OTP
-  const verifyOtp = async (data) => {
-    return await api.post("/api/accounts/verify_otp/", data);
-  };
+    const access = res.data.access;
+    const refresh = res.data.refresh;
+    const userData = res.data.user;  // backend must send {user: {...}}
 
-  // Login
-  const login = async (email, password) => {
-    const res = await api.post("/api/accounts/login/", { email, password });
-    localStorage.setItem("accessToken", res.data.access);
-    setUser(res.data.user);
+    // save tokens globally
+    saveTokens(access, refresh);
+    setAuthToken(access);
+
+    // update context + localStorage
+    setUser(userData);
+    localStorage.setItem("user", JSON.stringify(userData));
+
     return res;
   };
 
-  // Logout
   const logout = () => {
-    localStorage.removeItem("accessToken");
+    localStorage.clear();
     setUser(null);
     window.location.href = "/login";
   };
@@ -57,15 +67,16 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         user,
-        loading,
-        signup,
-        verifyOtp,
+        setUser,
         login,
         logout,
-        isAuthenticated: !!user,
+        isLoggedIn: !!user,
+        loading,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
-};
+}
+
+export const useAuth = () => useContext(AuthContext);

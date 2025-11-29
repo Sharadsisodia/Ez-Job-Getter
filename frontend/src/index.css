@@ -1,13 +1,108 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+:root{
+  --bg-1: #071024;
+  --bg-2: #071826;
+  --card-bg: rgba(255,255,255,0.03);
+  --glass: rgba(255,255,255,0.04);
+  --muted: #aab6c4;
+  --text: #E8F0FF;
+  --accent-1: #7c3aed;
+  --accent-2: #06b6d4;
+  --accent-grad: linear-gradient(90deg,var(--accent-1),var(--accent-2));
+  --ease: cubic-bezier(.22,.9,.3,1);
+  --nav-height: 68px;
+  --transition: all 220ms var(--ease);
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+/* page background with subtle motion for fun feel */
+body {
+  margin: 0;
+  font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: radial-gradient(1200px 600px at 10% 10%, rgba(124,58,237,0.06), transparent 12%),
+              radial-gradient(900px 400px at 90% 90%, rgba(6,182,212,0.04), transparent 10%),
+              linear-gradient(180deg,var(--bg-1),var(--bg-2));
+  color: var(--text);
+  min-height: 100vh;
+  transition: background 600ms ease;
+}
+
+/* subtle floating blobs that animate behind hero components */
+.blob {
+  position: absolute;
+  filter: blur(40px);
+  opacity: 0.09;
+  transform: translateZ(0);
+  will-change: transform;
+  animation: floaty 8s alternate infinite;
+}
+.blob--1 { width: 360px; height: 360px; background: radial-gradient(circle at 30% 30%, #7c3aedaa, transparent 35%); left: -60px; top: -80px; }
+.blob--2 { width: 260px; height: 260px; background: radial-gradient(circle at 30% 30%, #06b6d4aa, transparent 40%); right: -40px; bottom: -80px; animation-duration: 9s; }
+@keyframes floaty { from { transform: translateY(0); } to { transform: translateY(12px) translateX(6px); } }
+
+/* cards and auth: unified styling for modern experience */
+.card {
+  border-radius: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--glass);
+  box-shadow: 0 18px 48px rgba(2,6,23,0.56);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+/* unified button styles */
+.btn {
+  padding: 10px 16px; border-radius: 12px; font-weight: 700; cursor: pointer; border: none; transition: var(--transition);
+}
+.btn--primary {
+  background: var(--accent-grad);
+  color: white;
+  box-shadow: 0 12px 30px rgba(124,58,237,0.12);
+}
+.btn--ghost {
+  background: transparent; border: 1px solid rgba(255,255,255,0.04); color: var(--text);
+}
+
+/* input: shared floating label behavior and micro-interaction */
+.field {
+  position: relative;
+  transition: var(--transition);
+}
+.field input:not([type="file"]) {
+  background: transparent;
+  border-radius: 10px;
+  width: 100%;
+  padding: 12px 12px;
+  color: var(--text);
+  border: 1px solid rgba(255,255,255,0.04);
+  transition: var(--transition);
+}
+.field input:not([type="file"]):focus {
+  outline: none;
+  border-color: rgba(124,58,237,0.65);
+  box-shadow: 0 10px 30px rgba(124,58,237,0.06);
+  transform: translateY(-2px);
+}
+.field .label {
+  position: absolute; left: 12px; top: 12px; color: var(--muted); font-size: 13px; pointer-events:none; transition: var(--transition);
+}
+.field.filled .label, .field input:not([type="file"]):focus + .label {
+  transform: translateY(-18px) scale(.96);
+  color: #dbeafe;
+  font-size: 12px;
+}
+
+/* small helper text and badges */
+.muted { color: var(--muted); }
+.badge {
+  display:inline-block; padding: 6px 10px; border-radius: 12px; background: rgba(255,255,255,0.03); color: var(--muted); font-size: 13px; border: 1px solid rgba(255,255,255,0.02);
+}
+
+/* micro-animations to make interfaces feel fun but smooth */
+.fade-in { animation: fadeIn 400ms var(--ease) both; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
+
+/* accessible reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .blob { animation: none; } .fade-in { animation: none; }
 }

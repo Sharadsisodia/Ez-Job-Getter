@@ -159,8 +159,31 @@ class ResendOTPView(generics.GenericAPIView):
         if user.is_verified:
             return Response({'message': 'User already verified.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Your logic to resend OTP here
-        # Example: user.send_otp()
+        # Optional: simple rate-limiting - prevent resend within X seconds (e.g., 60s)
+        last_otp = OTP.objects.filter(user=user).order_by('-created_at').first()
+        if last_otp:
+            cooldown_seconds = 60
+            if (timezone.now() - last_otp.created_at).total_seconds() < cooldown_seconds and not last_otp.is_used:
+                return Response({'error': 'Please wait before requesting a new OTP.'}, status=status.HTTP_429_TOO_MANY_REQUESTS)
+
+        # Invalidate old unused OTPs
+        OTP.objects.filter(user=user, is_used=False).update(is_used=True)
+
+        # Create new OTP
+        otp_code = generate_otp()
+        expires_at = timezone.now() + datetime.timedelta(minutes=OTP_TTL_MINUTES)
+        OTP.objects.create(user=user, otp_code=otp_code, expires_at=expires_at)
+
+        # Send email (sync for dev)
+        subject = 'Your verification OTP'
+        message = f'Hi {user.name},\nYour verification OTP is: {otp_code}\nIt expires in {OTP_TTL_MINUTES} minutes.'
+        from_email = settings.EMAIL_HOST_USER
+        try:
+            send_mail(subject, message, from_email, [user.email], fail_silently=False)
+        except Exception as exc:
+            # Add error logging
+            return Response({'error': 'Failed to send OTP, try again later.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
         return Response({'message': 'OTP sent successfully.'}, status=status.HTTP_200_OK)
 
 

@@ -1,16 +1,13 @@
 export const saveTokens = (access, refresh) => {
-localStorage.setItem('access', access);
-localStorage.setItem('refresh', refresh);
+  localStorage.setItem('accessToken', access);
+  localStorage.setItem('refreshToken', refresh);
 };
 
-
-export const getAccessToken = () => localStorage.getItem('access');
-
+export const getAccessToken = () => localStorage.getItem('accessToken');
 
 export const logout = () => {
-localStorage.removeItem('access');
-localStorage.removeItem('refresh');
+  localStorage.removeItem('accessToken');
+  localStorage.removeItem('refreshToken');
 };
 
-
-export const isLoggedIn = () => !!localStorage.getItem('access');
+export const isLoggedIn = () => !!localStorage.getItem('accessToken');
