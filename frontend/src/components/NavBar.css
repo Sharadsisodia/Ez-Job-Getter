@@ -1,0 +1,245 @@
+:root {
+  --nav-h: 68px;
+  --nav-bg: rgba(7,10,20,0.7);
+  --accent-grad: linear-gradient(90deg,#7c3aed 0%,#06b6d4 100%);
+  --muted: rgba(255,255,255,0.85);
+}
+.nav {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  backdrop-filter: blur(8px);
+  background: linear-gradient(180deg, rgba(10,12,20,0.36), rgba(10,12,20,0.28));
+  transition: box-shadow 220ms ease, background 220ms ease, transform 220ms ease;
+  width: 100%;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+}
+.nav__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 8px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.logo { display:flex; gap:10px; align-items:center; cursor:pointer; }
+.logo__mark {
+  background: linear-gradient(90deg,#7c3aed,#06b6d4);
+  -webkit-background-clip: text; background-clip: text; color: transparent; font-weight: 800; padding: 6px 8px; border-radius: 8px; box-shadow: 0 10px 34px rgba(124,58,237,0.06);
+  transition: transform 280ms var(--ease);
+}
+.logo__text { color: var(--muted); font-weight:700; letter-spacing: 0.2px; }
+
+/* animated active nav underline using pseudo element */
+.nav__links { display:flex; align-items:center; gap: 12px; position:relative; max-width: calc(100% - 160px); overflow: visible; }
+.nav__link { position:relative; padding: 8px 12px; color: var(--muted); border-radius: 8px; font-weight:600; text-decoration:none; transition: var(--transition); }
+.nav__link:hover { transform: translateY(-2px); background: rgba(255,255,255,0.02); }
+.nav__link--active { color: #fff; background: rgba(255,255,255,0.03); box-shadow: 0 10px 30px rgba(6,182,212,0.04); }
+.nav__links::after { content: ""; position:absolute; height:3px; bottom:-8px; left:0; width:30px; background: linear-gradient(90deg,#7c3aed,#06b6d4); border-radius:6px; opacity:0; transition: var(--transition); transform: translateX(0); }
+.nav__link--active ~ .nav__links::after { opacity:1; }
+
+/* profile dropdown */
+.nav__profile { position:relative; display:flex; gap:8px; align-items:center; cursor:pointer; margin-left: 6px; z-index: 9999; }
+.nav__profile .profile__menu { display: none; position: absolute; right: 0; top: 48px; min-width: 180px; padding: 8px 6px; border-radius: 10px; background: rgba(8,10,20,0.98); border: 1px solid rgba(255,255,255,0.04); box-shadow: 0 10px 34px rgba(2,6,23,0.42); text-align: left; overflow: hidden; }
+.nav__profile:hover .profile__menu { display:block; transform-origin: top right; animation: drop 220ms var(--ease); }
+.profile__menu.open { display: block; transform-origin: top right; animation: drop 220ms var(--ease); }
+@keyframes drop { from { opacity:0; transform: translateY(-10px); } to { opacity:1; transform: translateY(0); } }
+
+/* menu items */
+.profile__link {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  color: rgba(255,255,255,0.92);
+  border-radius: 6px;
+  text-decoration: none;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 14px;
+}
+.profile__link:hover {
+  background: rgba(255,255,255,0.02);
+}
+.profile__link--danger {
+  color: #fda4af;
+  font-weight: 600;
+}
+
+/* search input micro interaction */
+.nav__search input { width: 260px; padding: 8px 12px; border-radius: 12px; background: rgba(255,255,255,0.02); color: var(--muted); border: 1px solid rgba(255,255,255,0.04); transition: width 200ms var(--ease); }
+.nav__search input:focus { width: 360px; border-color: rgba(124,58,237,0.6); }
+
+/* mobile improvements */
+@media (max-width: 880px) {
+  .nav__search { display:none; }
+  .nav__links { position: fixed; top: var(--nav-h); right: 12px; width: calc(100% - 48px); max-width: 360px; padding: 12px; flex-direction: column; gap: 10px; border-radius: 12px; background: rgba(8, 10, 20, 0.98); box-shadow: 0 30px 80px rgba(2,6,23,0.75); transform-origin: top right; display:none; }
+  .nav__links--open { display:flex; animation: pop 240ms var(--ease); flex-direction: column; }
+  @keyframes pop { from { transform: scale(.96); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+  .nav__hamburger { display:flex; margin-right: 4px; }
+  .nav__profile { align-self: flex-end; }
+}
+
+/* ensure nav covers full width and does not cause small white bar */
+html, body { width: 100%; height: 100%; overflow-x: hidden; }
+
+/* Ensure profile dropdown appears cleanly */
+.profile__menu { display: none; }
+.profile__menu.open { display: block; transform-origin: top right; animation: drop 220ms var(--ease); }
+
+/* avoid header overflow */
+.nav { box-sizing: border-box; width: 100%; left: 0; right: 0; }
+.nav__inner { max-width: 1200px; margin: 0 auto; padding: 8px 20px; }
+.nav__links { max-width: calc(100% - 160px); overflow: visible; }
+@media (max-width: 880px) {
+  .nav__links { width: calc(100% - 48px); right: 12px; left: auto; }
+}
+
+/* avoid any accidental whitespace or sub-pixel gaps on nav */
+.nav, .nav__inner {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Removed hamburger styles from visible UI */
+.nav__hamburger { display: none !important; }
+
+/* Notification icon improvements */
+.nav__icon {
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 10px;
+  cursor: pointer;
+  position: relative;
+  transition: background 220ms var(--ease), transform 180ms var(--ease), color 180ms var(--ease);
+}
+.nav__icon:hover {
+  background: linear-gradient(90deg, rgba(124,58,237,0.08), rgba(6,182,212,0.06));
+  color: white;
+  transform: translateY(-2px);
+}
+
+/* svg uses currentColor (no white backgrounds) */
+.nav__icon-svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  stroke: none;
+}
+
+/* Professional notification badge/pill */
+.nav__badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  background: linear-gradient(90deg, #06b6d4, #7c3aed);
+  color: #fff;
+  font-size: 11px;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 6px 18px rgba(7,10,20,0.55);
+  transform: translateZ(0);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Square ring avatar — outer square with rounded corner, inner circular face */
+.avatar {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;                 /* slightly smaller overall */
+  height: 40px;
+  padding: 4px;                /* thinner ring (smaller than before) */
+  border-radius: 8px;          /* rounded square outer shape */
+  background: linear-gradient(90deg, #7c3aed, #06b6d4); /* ring gradient */
+  cursor: pointer;
+  border: none;
+  transition: transform 220ms var(--ease), box-shadow 220ms var(--ease);
+  z-index: 10;
+  outline: none;
+}
+
+/* inner slot remains circular for face */
+.avatar__img,
+.avatar__initials {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  border-radius: 999px;        /* inner face is fully circular */
+  background: #071124;         /* inner contrast color */
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  box-shadow: 0 8px 20px rgba(2,6,23,0.45);
+  overflow: hidden;
+  object-fit: cover;
+}
+
+/* subtle ring visual */
+.avatar__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 8px; /* keeps square-like ring shape but smaller */
+  pointer-events: none;
+  box-shadow: 0 0 18px rgba(124,58,237,0.06);
+  transition: opacity 200ms var(--ease), transform 300ms var(--ease);
+}
+
+/* Smaller status indicator positioned neatly */
+.avatar__status {
+  position: absolute;
+  right: -3px;
+  bottom: -3px;
+  width: 10px;                 /* smaller dot */
+  height: 10px;
+  border-radius: 999px;
+  border: 2px solid rgba(7,10,20,0.9);
+  background: #94a3b8;
+  box-shadow: 0 6px 14px rgba(6,182,212,0.12);
+}
+
+/* online: refined pulse not bulky */
+.avatar__status.is-online {
+  background: #22c55e;
+  box-shadow: 0 6px 18px rgba(34,197,94,0.12);
+  animation: avatarPulse 1800ms infinite ease-in-out;
+}
+
+/* Hover & focus micro interactions */
+.avatar:hover { transform: translateY(-3px); box-shadow: 0 14px 36px rgba(6,182,212,0.06); }
+.avatar:focus { outline: 2px solid rgba(124,58,237,0.14); outline-offset: 2px; }
+
+/* pro animation for online status */
+.avatar__status.is-online {
+  background: #22c55e;
+  box-shadow: 0 6px 22px rgba(34,197,94,0.12), 0 0 0 rgba(34,197,94,0.16);
+  animation: avatarPulse 1800ms infinite ease-in-out;
+}
+@keyframes avatarPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+  100% { transform: scale(1); }
+}
+
+/* reduce motion support */
+@media (prefers-reduced-motion: reduce) {
+  .avatar, .avatar__status { transition: none !important; animation: none !important; }
+}

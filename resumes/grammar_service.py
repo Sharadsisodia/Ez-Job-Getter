@@ -24,25 +24,41 @@ def parse_basic(text: str) -> dict:
 # Create tool only once (when server starts)
 tool = language_tool_python.LanguageTool("en-US")
 
-def grammar_check_text(text: str) -> dict:
+import requests
+
+def grammar_check_text(text: str):
     if not text:
         return {"grammar_score": 0, "suggestions": []}
 
-    matches = tool.check(text)
+    url = "https://api.languagetool.org/v2/check"
+
+    payload = {
+        "text": text,
+        "language": "en-US"
+    }
+
+    res = requests.post(url, data=payload)
+    data = res.json()
+
     suggestions = []
     penalties = 0
 
-    for m in matches:
+    for match in data.get("matches", []):
         suggestions.append({
-            "offset": m.offset,
-            "length": m.errorLength,
-            "message": m.message,
-            "replacement": m.replacements[:1] if m.replacements else []
+            "message": match.get("message"),
+            "offset": match.get("offset"),
+            "length": match.get("length"),
+            "replacement": match.get("replacements", [])[0].get("value") if match.get("replacements") else ""
         })
         penalties += 2
 
     score = max(0, 100 - penalties)
-    return {"grammar_score": score, "suggestions": suggestions}
+
+    return {
+        "grammar_score": score,
+        "suggestions": suggestions
+    }
+
 
 
 
