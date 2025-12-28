@@ -8,6 +8,7 @@ import OtpVerify from "./pages/OtpPage";
 import Dashboard from "./pages/DashboardPage";
 import HomePage from "./pages/HomePage";
 import ResumePage from "./pages/ResumePage";
+import JobPage from "./pages/JobPage";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { AuthProvider } from "./context/AuthContext";
 import NavBar from "./components/Navbar.js";
@@ -33,11 +34,22 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          
           <Route
             path="/resume"
             element={
               <ProtectedRoute>
                 <ResumePage />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/jobs"
+            element={
+              <ProtectedRoute>
+                <JobPage />
               </ProtectedRoute>
             }
           />

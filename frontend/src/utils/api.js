@@ -61,6 +61,43 @@ if (storedToken) {
   api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
 }
 
+// =============================
+// JOBS API
+// =============================
+
+// 1) Get all jobs OR create job (if employer)
+export const jobsAPI = {
+  list: () => api.get("/api/jobs/"),
+  create: (payload) => api.post("/api/jobs/", payload),
+};
+
+// 2) Search external (scraper-based) jobs
+export const searchJobsAPI = ({
+  role = "",
+  location = "",
+  pages = 1,
+  sources = "",
+}) =>
+  api.get(
+    `/api/jobs/search/?role=${role}&location=${location}&pages=${pages}&sources=${sources}`
+  );
+
+// 3) Employer job list + create
+export const employerJobsAPI = {
+  list: () => api.get("/api/jobs/employer_jobs/"),
+  create: (payload) => api.post("/api/jobs/employer_jobs/", payload),
+};
+
+// 4) Employer Job detail (GET, PUT, DELETE)
+export const employerJobDetailAPI = {
+  get: (id) => api.get(`/api/jobs/${id}/employer_job_detail/`),
+  update: (id, payload) =>
+    api.put(`/api/jobs/${id}/employer_job_detail/`, payload),
+  delete: (id) => api.delete(`/api/jobs/${id}/employer_job_detail/`),
+};
+
+
+
 // Basic endpoints used by the frontend
 export const loginAPI = (payload) => api.post('/api/accounts/login/', payload);
 export const signupAPI = (payload) => api.post('/api/accounts/signup/', payload);
