@@ -1,7 +1,7 @@
+import os
 import fitz   # PyMuPDF
 import docx
 import re
-import language_tool_python
 
 def extract_text_from_file(file_path: str) -> str:
     if file_path.lower().endswith(".pdf"):
@@ -21,24 +21,32 @@ def parse_basic(text: str) -> dict:
         "skills": [s for s in ["Python", "Django", "SQL", "Java"] if s.lower() in text.lower()]
     }
 
-# Create tool only once (when server starts)
-tool = language_tool_python.LanguageTool("en-US")
-
 import requests
 
 def grammar_check_text(text: str):
     if not text:
         return {"grammar_score": 0, "suggestions": []}
 
-    url = "https://api.languagetool.org/v2/check"
+    # Prefer a local/managed LanguageTool HTTP server. Set LANGUAGETOOL_SERVER to override.
+    url = os.environ.get("LANGUAGETOOL_SERVER", "http://localhost:8081/v2/check")
 
     payload = {
         "text": text,
         "language": "en-US"
     }
 
-    res = requests.post(url, data=payload)
-    data = res.json()
+    try:
+        res = requests.post(url, data=payload, timeout=10)
+        res.raise_for_status()
+        data = res.json()
+    except Exception:
+        # Fallback to public LanguageTool API if local server is unavailable.
+        try:
+            res = requests.post("https://api.languagetool.org/v2/check", data=payload, timeout=10)
+            res.raise_for_status()
+            data = res.json()
+        except Exception:
+            return {"grammar_score": 0, "suggestions": []}
 
     suggestions = []
     penalties = 0
